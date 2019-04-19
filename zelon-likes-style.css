@@ -1,0 +1,23 @@
+.lzl_like_func_style_1 {
+  width : 50px;
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  cursor: pointer;
+  text-align: center;
+  color: #555555;
+  background-color: white;
+  border:  2px solid #555555;
+}
+
+.lzl_like_func_style_1:hover {
+  color: white;
+  background-color: #555555;
+}
+
+.lzl_like_func_style_1:active {
+  color: #555555;
+  background-color: white;
+  border:  2px solid #555555;
+}
