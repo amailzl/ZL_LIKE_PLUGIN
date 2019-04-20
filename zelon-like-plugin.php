@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: zelon-likes-func
+Plugin Name: zelon-like-plugin
 Plugin URI:
 Description: add like/dislike func of articles
 Version:     0.0.2
@@ -67,7 +67,7 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         }
 
         public function zelon_add_style() {
-            wp_enqueue_style( 'zelon-likes-style', plugins_url('./zelon-likes-style.css', __FILE__) );
+            wp_enqueue_style( 'zelon-like-style', plugins_url('./zelon-like-style.css', __FILE__) );
         }
 
         public function insert_after_content( $postcontent ) {
