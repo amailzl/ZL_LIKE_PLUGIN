@@ -1,32 +1,34 @@
-// jQuery(document).ready(function($) {           //wrapper
-//     $(".lzl_like_func_style_1").click(function() {             //event
-//         var this2 = this;                      //use in callback
-//         $.post(my_ajax_obj.ajax_url, {         //POST request
-//            _ajax_nonce: my_ajax_obj.nonce,     //nonce
-//             action: "my_tag_count",            //action
-//             title: this.value                  //data
-//         }, function(data) {                    //callback
-//             // this2.nextSibling.remove();        //remove current title
-//             // $(this2).after(data);              //insert server response
-//             alert( "Handler for .click() called." );
-//         });
-//     });
-// });
-window.onload=function(){
-    var onlike = document.getElementById('#like');
-    onlike.addEventListener('click',function (e) {
-    alert('1. Div capture ran');
-    },true);
-}
+//beaware that the little difference between WP-JQ and JQuery , that matters
+//https://developer.wordpress.org/plugins/javascript/jquery/
 
-$(document).ready(function() {
-  $(".lzl_like_func_style_1").click(function () {
-    alert("Hello!");
-  });
+//if like pressed
+jQuery(document).ready(function($) {
+    $("#zl-like").click(function () {
+        alert("like");
+        var this2 = this;                      //use in callback
+        $.post(zl_press_action.ajax_url, {         //POST request
+           _ajax_nonce: zl_press_action.nonce,     //nonce
+            action: "zl_like_press",            //action
+            count: this.value                  //data
+        }, function(data) {                    //callback
+            alert("like-cb");
+            // this2.nextSibling.remove();        //remove current title
+            // $(this2).after(data);              //insert server response
+        });
+    });
 });
 
-$(document).ready(function(){
-  $('#like').on("click",function(){
-    alert("段落被点击了。");
-  });
+//if dislike pressed
+jQuery(document).ready(function($) {
+    $("#zl-dislike").click(function () {
+        alert("dislike");
+    });
 });
+
+//if donate pressed
+jQuery(document).ready(function($) {
+    $("#zl-donate").click(function () {
+        alert("donate");
+    });
+});
+

@@ -35,7 +35,6 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         // add css style file
         // https://developer.wordpress.org/reference/functions/plugins_url/
         // https://developer.wordpress.org/reference/functions/wp_enqueue_style/
-
         function __construct() {
             //[lzl][init]https://codex.wordpress.org/Plugin_API/Action_Reference/init
             //[widgets_init]https://developer.wordpress.org/reference/hooks/widgets_init/
@@ -47,6 +46,7 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
 //          //[the_content]https://codex.wordpress.org/Plugin_API/Filter_Reference/the_content
             add_filter( 'the_content', array( $this, 'insert_after_content'), $this->get_content_filter_priority());
             add_action( 'wp_enqueue_scripts', array( $this, 'zelon_add_style'));
+            add_action( 'wp_ajax_zl_like_press', array( $this, 'my_ajax_handler') );
 //          $this->settings = new AddWidgetAfterContentAdmin($this->plugin_slug, $this->plugin_version );
         }
 
@@ -72,23 +72,25 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
                 //https://developer.wordpress.org/reference/functions/is_single/
                 wp_enqueue_style( 'zelon-like-style', plugins_url('./zelon-like-style.css', __FILE__) );
                 wp_enqueue_script( 'zelon-like-script', plugins_url('/button-response.js', __FILE__), array('jquery'));
-                $title_nonce = wp_create_nonce( 'title_example' );
-                wp_localize_script( 'ajax-script', 'my_ajax_obj', array(
-                    'ajax_url' => admin_url( 'zelon-like-plugin.php' ),
-                    'nonce'    => $title_nonce,
+                $zl_nonce = wp_create_nonce( 'zl_like_nonce' );
+                //https://codex.wordpress.org/Function_Reference/wp_localize_script
+                wp_localize_script( 'zelon-like-script', 'zl_press_action', array(
+                    'ajax_url' => admin_url( 'admin-ajax.php' ),
+                    'nonce'    => $zl_nonce,
                 ) );
             }
             return;
         }
         //JSON
         function my_ajax_handler() {
-            check_ajax_referer( 'title_example' );
-            update_user_meta( get_current_user_id(), 'title_preference', $_POST['title'] );
-            $args = array(
-                'tag' => $_POST['title'],
-            );
-            $the_query = new WP_Query( $args );
-            wp_send_json( $_POST['title'] . ' (' . $the_query->post_count . ') ' );
+//             check_ajax_referer('zl_like_nonce');
+            echo 'testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt';
+            // update_user_meta( get_current_user_id(), 'title_preference', $_POST['title'] );
+            // $args = array(
+            //     'tag' => $_POST['title'],
+            // );
+            // $the_query = new WP_Query( $args );
+            // wp_send_json( $_POST['title'] . ' (' . $the_query->post_count . ') ' );
         }
 
         public function insert_after_content( $postcontent ) {
@@ -108,36 +110,16 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
             //  dynamic_sidebar( 'add-widget-after-content' );
             //  $sidebar = ob_get_contents();
             //  ob_end_clean();
-            $test='<div align="center"><button class="lzl_like_func_style_1"><span id="like">喜欢</span></button>';
-            $test.=' | <button class="lzl_like_func_style_1">不喜欢</button>';
-            $test.=' | <button class="lzl_like_func_style_1">打赏</button></div>';
-
-//          $test='<div align="center"><span class="lzl_like_func_style_1">喜欢</span>';
-//             $test.=' | <span class="lzl_like_func_style_1">不喜欢</span>';
-//             $test.=' | <span class="lzl_like_func_style_1">打赏</span></div>';
-
-//          $test.='<script>
-//              jQuery(document).ready(function($) {           //wrapper
-//                  $(".pref").change(function() {             //event
-//                      var this2 = this;                      //use in callback
-//                      $.post(my_ajax_obj.ajax_url, {         //POST request
-//                         _ajax_nonce: my_ajax_obj.nonce,     //nonce
-//                          action: "my_tag_count",            //action
-//                          title: this.value                  //data
-//                      }, function(data) {                    //callback
-//                          this2.nextSibling.remove();        //remove current title
-//                          $(this2).after(data);              //insert server response
-//                      });
-//                  });
-//              });</script>';
-//             $test.='  <script>$( ".lzl_like_func_style_1").click(function() {
-//                  alert( "Handler for .click() called." );});</script>';
-//          $test.='  <script>
-//                  alert( "Handler for .click() called." );</script>';
-//          $test.='<div id="target">Click here</div>
-//              <script>$( "#target" ).click(function() {
-//                  alert( "Handler for .click() called." );
-//              });</script>';
+            global $likes;
+            if(get_post_meta(get_the_ID(), 'likes',true)){
+                            $likes=get_post_meta(get_the_ID(), 'likes',true);
+                        }else{
+                            $likes=0;
+                        }
+            echo $likes;
+            $test='<div align="center"><button id="zl-like" class="lzl_like_func_style_1">喜欢<span><?php echo 0></span></button>';
+            $test.=' | <button id="zl-dislike" class="lzl_like_func_style_1">不喜欢</button>';
+            $test.=' | <button id="zl-donate" class="lzl_like_func_style_1">打赏</button></div>';
             return $test;
         }
 
