@@ -39,6 +39,7 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
             add_filter( 'the_content', array( $this, 'insert_after_content'), $this->get_content_filter_priority());
             add_action( 'wp_enqueue_scripts', array( $this, 'zelon_add_style'));
             add_action( 'wp_ajax_zl_like_press', array( $this, 'like_press_handler'));
+            add_action( 'wp_ajax_zl_dislike_press', array( $this, 'dislike_press_handler'));
 //          $this->settings = new AddWidgetAfterContentAdmin($this->plugin_slug, $this->plugin_version );
         }
 
@@ -79,6 +80,13 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         //JSON
         function like_press_handler() {
             $id = $_POST["post_id"];
+            $expire = time() + 60*60*24*365*10;
+            $domain = ($_SERVER['HTTP_HOST'] != 'localhost')?$_SERVER['HTTP_HOST']:false;
+            setcookie("choice_cookies", $id, $expire. '/', $domain, false);
+            if(isset($_COOKIE['choice_cookies'])) {
+                echo 'done';
+                wp_die();
+            }
             $zl_post_likes = get_post_meta($id, "zl_likes", true);
             if(!$zl_post_likes || !is_numeric($zl_post_likes)){
                 update_post_meta($id, 'zl_likes', 1);
@@ -86,6 +94,26 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
                 update_post_meta($id, 'zl_likes', ($zl_post_likes+1));
             }
             echo get_post_meta($id, "zl_likes", true);
+            wp_die();
+        }
+
+        //JSON
+        function dislike_press_handler() {
+            $id = $_POST["post_id"];
+            $expire = time() + 60*60*24*365*10;
+            $domain = ($_SERVER['HTTP_HOST'] != 'localhost')?$_SERVER['HTTP_HOST']:false;
+            setcookie("choice_cookies", $id, $expire. '/', $domain, false);
+            if(isset($_COOKIE['choice_cookies'])) {
+                echo 'done';
+                wp_die();
+            }
+            $zl_post_dislikes = get_post_meta($id, "zl_dislikes", true);
+            if(!$zl_post_dislikes || !is_numeric($zl_post_dislikes)){
+                update_post_meta($id, 'zl_dislikes', 1);
+            } else {
+                update_post_meta($id, 'zl_dislikes', ($zl_post_likes+1));
+            }
+            echo get_post_meta($id, "zl_dislikes", true);
             wp_die();
         }
 
@@ -103,13 +131,18 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         */
         public function zl_likes_get3bn() {
             $likes = get_post_meta(get_the_ID(), "zl_likes", true);
+            $dislikes = get_post_meta(get_the_ID(), "zl_dislikes", true);
             if(!$likes || !is_numeric($likes)){
                 $likes = 0;
                 update_post_meta(get_the_ID(), 'zl_likes', 0);
             }
+            if(!$dislikes || !is_numeric($dislikes)){
+                $dislikes = 0;
+                update_post_meta(get_the_ID(), '$dislikes', 0);
+            }
             $fmt_3bt='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="lzl_like_func_style_1">喜欢<span class="like_counts">('.$likes.')</span></button>';
             //'.php.' use ('.) (.')to wrap the php content you want to use
-            $fmt_3bt.=' | <button id="zl-dislike" class="lzl_like_func_style_1">不喜欢</button>';
+            $fmt_3bt.=' | <button id="zl-dislike" data-id="'.get_the_ID().'" class="lzl_like_func_style_1">不喜欢<span class="dislike_counts">('.$dislikes.')</span></button>';
             $fmt_3bt.=' | <button id="zl-donate" class="lzl_like_func_style_1">打赏</button></div>';
             return $fmt_3bt;
         }
