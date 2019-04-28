@@ -36,19 +36,13 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         // https://developer.wordpress.org/reference/functions/plugins_url/
         // https://developer.wordpress.org/reference/functions/wp_enqueue_style/
         function __construct() {
-            //[lzl][init]https://codex.wordpress.org/Plugin_API/Action_Reference/init
-            //[widgets_init]https://developer.wordpress.org/reference/hooks/widgets_init/
-//          add_action( 'widgets_init', array( $this,'register_sidebar'));
-//          //[add_meta_boxes]https://developer.wordpress.org/reference/hooks/add_meta_boxes/
-//          add_action( 'add_meta_boxes', array( $this,'after_content_create_metabox') );
-//          //[save_post]https://developer.wordpress.org/reference/hooks/save_post/
-//          add_action( 'save_post', array( $this,'after_content_save_meta') );
-//          //[the_content]https://codex.wordpress.org/Plugin_API/Filter_Reference/the_content
             add_filter( 'the_content', array( $this, 'insert_after_content'), $this->get_content_filter_priority());
             add_action( 'wp_enqueue_scripts', array( $this, 'zelon_add_style'));
-            add_action( 'wp_ajax_zl_like_press', array( $this, 'my_ajax_handler') );
+            add_action( 'wp_ajax_zl_like_press', array( $this, 'like_press_handler'));
 //          $this->settings = new AddWidgetAfterContentAdmin($this->plugin_slug, $this->plugin_version );
         }
+
+
 
         public static function activate() {
             if (get_option('zllp_priority') === false){
@@ -71,7 +65,7 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
                 //only enqueue your script when you need it
                 //https://developer.wordpress.org/reference/functions/is_single/
                 wp_enqueue_style( 'zelon-like-style', plugins_url('./zelon-like-style.css', __FILE__) );
-                wp_enqueue_script( 'zelon-like-script', plugins_url('/button-response.js', __FILE__), array('jquery'));
+                wp_enqueue_script( 'zelon-like-script', plugins_url('./button-response.js', __FILE__), array('jquery'));
                 $zl_nonce = wp_create_nonce( 'zl_like_nonce' );
                 //https://codex.wordpress.org/Function_Reference/wp_localize_script
                 wp_localize_script( 'zelon-like-script', 'zl_press_action', array(
@@ -81,16 +75,18 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
             }
             return;
         }
+
         //JSON
-        function my_ajax_handler() {
-//             check_ajax_referer('zl_like_nonce');
-            echo 'testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt';
-            // update_user_meta( get_current_user_id(), 'title_preference', $_POST['title'] );
-            // $args = array(
-            //     'tag' => $_POST['title'],
-            // );
-            // $the_query = new WP_Query( $args );
-            // wp_send_json( $_POST['title'] . ' (' . $the_query->post_count . ') ' );
+        function like_press_handler() {
+            $id = $_POST["post_id"];
+            $zl_post_likes = get_post_meta($id, "zl_likes", true);
+            if(!$zl_post_likes || !is_numeric($zl_post_likes)){
+                update_post_meta($id, 'zl_likes', 1);
+            } else {
+                update_post_meta($id, 'zl_likes', ($zl_post_likes+1));
+            }
+            echo get_post_meta($id, "zl_likes", true);
+            wp_die();
         }
 
         public function insert_after_content( $postcontent ) {
@@ -101,26 +97,21 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
             return $postcontent;
         }
 
+
         /**
-                 * Get what ever is to be in the widget area, but don't display it yet
-                 * @return string the content of the add-widget-after-content sidebar/widget
-                 */
+        * Get 3_button form for html
+        */
         public function zl_likes_get3bn() {
-            //  ob_start();
-            //  dynamic_sidebar( 'add-widget-after-content' );
-            //  $sidebar = ob_get_contents();
-            //  ob_end_clean();
-            global $likes;
-            if(get_post_meta(get_the_ID(), 'likes',true)){
-                            $likes=get_post_meta(get_the_ID(), 'likes',true);
-                        }else{
-                            $likes=0;
-                        }
-            echo $likes;
-            $test='<div align="center"><button id="zl-like" class="lzl_like_func_style_1">喜欢<span><?php echo 0></span></button>';
-            $test.=' | <button id="zl-dislike" class="lzl_like_func_style_1">不喜欢</button>';
-            $test.=' | <button id="zl-donate" class="lzl_like_func_style_1">打赏</button></div>';
-            return $test;
+            $likes = get_post_meta(get_the_ID(), "zl_likes", true);
+            if(!$likes || !is_numeric($likes)){
+                $likes = 0;
+                update_post_meta(get_the_ID(), 'zl_likes', 0);
+            }
+            $fmt_3bt='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="lzl_like_func_style_1">喜欢<span class="like_counts">('.$likes.')</span></button>';
+            //'.php.' use ('.) (.')to wrap the php content you want to use
+            $fmt_3bt.=' | <button id="zl-dislike" class="lzl_like_func_style_1">不喜欢</button>';
+            $fmt_3bt.=' | <button id="zl-donate" class="lzl_like_func_style_1">打赏</button></div>';
+            return $fmt_3bt;
         }
 
         //https://codex.wordpress.org/Conditional_Tags
@@ -137,3 +128,4 @@ if (class_exists( 'zl_like_plugin' ) ) {
     register_activation_hook( __FILE__, array( 'zl_like_plugin', 'activate' ) );
     $zl_LP = new zl_like_plugin();
 }
+

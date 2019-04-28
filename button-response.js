@@ -1,19 +1,18 @@
 //beaware that the little difference between WP-JQ and JQuery , that matters
 //https://developer.wordpress.org/plugins/javascript/jquery/
-
 //if like pressed
 jQuery(document).ready(function($) {
     $("#zl-like").click(function () {
-        alert("like");
-        var this2 = this;                      //use in callback
-        $.post(zl_press_action.ajax_url, {         //POST request
+        var counts = $(this).children('.like_counts'),  //query class like_counts of the page
+            id = $(this).data("id");        //query data-id of the page
+        jQuery.post(zl_press_action.ajax_url, {         //POST request
            _ajax_nonce: zl_press_action.nonce,     //nonce
-            action: "zl_like_press",            //action
-            count: this.value                  //data
-        }, function(data) {                    //callback
-            alert("like-cb");
-            // this2.nextSibling.remove();        //remove current title
-            // $(this2).after(data);              //insert server response
+            action: "zl_like_press",              //action
+            post_id: id                 //id
+        }, function(data) {
+            //callback
+            res = "(" + data + ")";
+            $(counts).html(res);     //add suffix as the class content
         });
     });
 });
