@@ -21,3 +21,11 @@
   background-color: white;
   border:  2px solid #555555;
 }
+
+.lzl_like_func_QR_img {
+    border-radius: 8px;
+  	display: inline-block;
+	background: #555555;
+	padding: 5px 5px;
+	border: solid #555555;
+}

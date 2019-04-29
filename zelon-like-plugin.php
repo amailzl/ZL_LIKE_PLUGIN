@@ -40,7 +40,8 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
             add_action( 'wp_enqueue_scripts', array( $this, 'zelon_add_style'));
             add_action( 'wp_ajax_zl_like_press', array( $this, 'like_press_handler'));
             add_action( 'wp_ajax_zl_dislike_press', array( $this, 'dislike_press_handler'));
-//          $this->settings = new AddWidgetAfterContentAdmin($this->plugin_slug, $this->plugin_version );
+            add_action( 'wp_ajax_zl_donate_press', array( $this, 'donate_press_handler'));
+            //          $this->settings = new AddWidgetAfterContentAdmin($this->plugin_slug, $this->plugin_version );
         }
 
 
@@ -80,41 +81,84 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         //JSON
         function like_press_handler() {
             $id = $_POST["post_id"];
+            $like = 'zl_likes';
+            $dislike = 'zl_dislikes';
             $expire = time() + 60*60*24*365*10;
             $domain = ($_SERVER['HTTP_HOST'] != 'localhost')?$_SERVER['HTTP_HOST']:false;
-            setcookie("choice_cookies", $id, $expire. '/', $domain, false);
-            if(isset($_COOKIE['choice_cookies'])) {
+            if(isset($_COOKIE[$like.$id])) {
+                if(isset($_COOKIE[$dislike.$id])) {
+                    $this->update_post_meta_minus_1($id, $dislike);
+                    setcookie($dislike.$id, '', time()-3600);
+                }
                 echo 'done';
                 wp_die();
             }
-            $zl_post_likes = get_post_meta($id, "zl_likes", true);
-            if(!$zl_post_likes || !is_numeric($zl_post_likes)){
-                update_post_meta($id, 'zl_likes', 1);
-            } else {
-                update_post_meta($id, 'zl_likes', ($zl_post_likes+1));
+            setcookie($like.$id, $id, $expire. '/', $domain, false);
+            if(isset($_COOKIE[$dislike.$id])) {
+                $this->update_post_meta_minus_1($id, $dislike);
+                setcookie($dislike.$id, '', time()-3600);
             }
-            echo get_post_meta($id, "zl_likes", true);
+            $this->update_post_meta_plus_1($id, $like);
+            echo get_post_meta($id, "$like", true);
             wp_die();
         }
 
         //JSON
         function dislike_press_handler() {
             $id = $_POST["post_id"];
+            $like = 'zl_likes';
+            $dislike = 'zl_dislikes';
             $expire = time() + 60*60*24*365*10;
             $domain = ($_SERVER['HTTP_HOST'] != 'localhost')?$_SERVER['HTTP_HOST']:false;
-            setcookie("choice_cookies", $id, $expire. '/', $domain, false);
-            if(isset($_COOKIE['choice_cookies'])) {
+            if(isset($_COOKIE[$dislike.$id])) {
+                if(isset($_COOKIE[$like.$id])) {
+                    $this->update_post_meta_minus_1($id, $like);
+                    setcookie($like.$id, '', time()-3600);
+                }
                 echo 'done';
                 wp_die();
             }
-            $zl_post_dislikes = get_post_meta($id, "zl_dislikes", true);
-            if(!$zl_post_dislikes || !is_numeric($zl_post_dislikes)){
-                update_post_meta($id, 'zl_dislikes', 1);
-            } else {
-                update_post_meta($id, 'zl_dislikes', ($zl_post_likes+1));
+            setcookie($dislike.$id, $id, $expire. '/', $domain, false);
+            if(isset($_COOKIE[$like.$id])) {
+                $this->update_post_meta_minus_1($id, $like);
+                setcookie($like.$id, '', time()-3600);
             }
-            echo get_post_meta($id, "zl_dislikes", true);
+            $this->update_post_meta_plus_1($id, $dislike);
+            echo get_post_meta($id, "$dislike", true);
             wp_die();
+        }
+
+        function donate_press_handler() {
+            $id = $_POST["post_id"];
+            $expire = time() + 60*60*24*365*10;
+            $domain = ($_SERVER['HTTP_HOST'] != 'localhost')?$_SERVER['HTTP_HOST']:false;
+            $donate = 'donate'.$id;
+            if(isset($_COOKIE[$donate])) {
+                setcookie($donate, '', time()-3600);
+                echo 'hide';
+                wp_die();
+            }
+            setcookie($donate, $id, $expire. '/', $domain, false);
+            echo 'show';
+            wp_die();
+        }
+
+        public function update_post_meta_plus_1($id, $field){
+            $count = get_post_meta($id, "$field", true);
+            if(!$count || !is_numeric($count)){
+                update_post_meta($id, $field, 1);
+            } else {
+                update_post_meta($id, $field, $count+1);
+            }
+        }
+
+        public function update_post_meta_minus_1($id, $field){
+            $count = get_post_meta($id, $field, true);
+            if(!$count || !is_numeric($count)){
+                update_post_meta($id, $field, 0);
+            } else {
+                update_post_meta($id, $field, ($count-1));
+            }
         }
 
         public function insert_after_content( $postcontent ) {
@@ -130,6 +174,8 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
         * Get 3_button form for html
         */
         public function zl_likes_get3bn() {
+			$QRurl = plugins_url('./user/1556508976.png', __FILE__);
+			$ToSponsor = 'THANKS';
             $likes = get_post_meta(get_the_ID(), "zl_likes", true);
             $dislikes = get_post_meta(get_the_ID(), "zl_dislikes", true);
             if(!$likes || !is_numeric($likes)){
@@ -143,7 +189,9 @@ if ( !class_exists( 'zl_like_plugin' ) ) {
             $fmt_3bt='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="lzl_like_func_style_1">喜欢<span class="like_counts">('.$likes.')</span></button>';
             //'.php.' use ('.) (.')to wrap the php content you want to use
             $fmt_3bt.=' | <button id="zl-dislike" data-id="'.get_the_ID().'" class="lzl_like_func_style_1">不喜欢<span class="dislike_counts">('.$dislikes.')</span></button>';
-            $fmt_3bt.=' | <button id="zl-donate" class="lzl_like_func_style_1">打赏</button></div>';
+            $fmt_3bt.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="lzl_like_func_style_1">打赏</button></div>';
+            $fmt_3bt.='<div id="theQR" align="center" ><br/><br/><img src="'.$QRurl.'"  alt="oops..." width="100" height="100"/></div>';
+            $fmt_3bt.='<div id="comment" align="center" ><br/>'.$ToSponsor.'</div>';
             return $fmt_3bt;
         }
 
