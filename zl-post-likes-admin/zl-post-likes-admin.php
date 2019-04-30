@@ -48,7 +48,8 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
 
 
         /**
-         * Adds the 'Add Widget After Content Options' to the Appearance menu in the Dashboard
+         * Adds the 'ZL Post Likes Options' to the Appearance menu in the Dashboard
+         * https://codex.wordpress.org/Roles_and_Capabilities#manage_options
          */
         public function zl_add_options_page(){
             add_theme_page(
@@ -56,7 +57,7 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
                 'ZL Post Likes',
                 'manage_options',
                 'ZLPL-options',
-                array($this, 'awac_options_display')
+                array($this, 'zlpl_options_display')
             );
 
         }
@@ -65,10 +66,10 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
         /**
          * Renders the content of the awac options page
          */
-        public function awac_options_display(){
+        public function zlpl_options_display(){
             //Get the tabs that need to be displayed
             $tabs = $this->awac_get_tabs($this->awac_get_extension_settings());
-            require plugin_dir_path( __FILE__ ) . 'partials/awac-options-display.php';
+            require plugin_dir_path( __FILE__ ) . 'zl-post-likes-admin/zlpl_options_display.php';
         }
 
         /**
