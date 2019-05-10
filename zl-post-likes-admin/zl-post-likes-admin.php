@@ -41,8 +41,8 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
             $this->plugin_name = $plugin_name;
             $this->version = $version;
             add_action('admin_menu', array( $this,'zl_add_options_page'));
-            add_action('admin_init', array( $this,'awac_initialize_options'));
-            add_filter('admin_footer_text', array( $this,'awac_display_admin_footer'));
+            add_action('admin_init', array( $this,'zl_initialize_options'));
+            add_filter('admin_footer_text', array( $this,'zl_display_admin_footer'));
 
         }
 
@@ -52,293 +52,218 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
          * https://codex.wordpress.org/Roles_and_Capabilities#manage_options
          */
         public function zl_add_options_page(){
-            add_theme_page(
+            add_menu_page(
                 'ZL Post Likes Options',
                 'ZL Post Likes',
                 'manage_options',
                 'ZLPL-options',
                 array($this, 'zlpl_options_display')
             );
-
         }
 
+        public function upload_img(){
+                // First check if the file appears on the _FILES array
+                if(isset($_FILES['upload_img'])){
+                        $pdf = $_FILES['upload_img'];
+
+                        // Use the wordpress function to upload
+                        // test_upload_pdf corresponds to the position in the $_FILES array
+                        // 0 means the content is not associated with any other posts
+                        $uploaded=media_handle_upload('upload_img', 0);
+                        // Error checking using WP functions
+                        if(is_wp_error($uploaded)){
+                                echo "Error uploading file: " . $uploaded->get_error_message();
+                        }else{
+                                echo "File upload successful!";
+                        }
+                }
+        }
 
         /**
-         * Renders the content of the awac options page
+         * Renders the content of the zl options page
          */
         public function zlpl_options_display(){
-            //Get the tabs that need to be displayed
-            $tabs = $this->awac_get_tabs($this->awac_get_extension_settings());
-            require plugin_dir_path( __FILE__ ) . 'zl-post-likes-admin/zlpl_options_display.php';
+            if ( ! current_user_can( 'manage_options' ) ) {
+                return;
+            }
+            $this->upload_img();
+            $tabs = $this->zl_get_tabs();
+            require_once(ZL_POST_LIKES_DIR . 'zl-post-likes-admin/zlpl_options_display.php');
         }
 
-        /**
-         * Get the settings added by styles using filters
-         * @return array of extensions
-         *
-         * Other plugins can add to the awac_extensions setting during plugin activation
-         * $extensions =  get_option('awac_extensions');
-         * update_option('awac_extensions', extensionClass::register_awac_comments($extensions) );
-         *
-         * Plugins should
-         * public static function deactivate(){
-         * $extensions = get_option('awac_extensions');
-         * if(isset($extensions['awac_basic']['awac-comments'])) {
-         * unset($extensions['awac_basic']['awac-comments']);
-         * update_option('awac_extensions', $extensions);}}
-         *
-         *
-         * public static function register_awac_comments($extensions){
-         * $extensions['TAB']['extension-id']['id']= 'extension-id';
-         * $extensions['TAB']['extension-id']['name']= 'Extension Name';
-         * $extensions['TAB']['extension-id']['description']= 'Extension Description.';
-         * return $extensions;}
-         *
-         * TAB options are awac_basic, styles, addon
-         */
-        public function awac_get_extension_settings(){
-            $extensions = get_option( 'awac_extensions');
+        public function zl_get_tabs(){
 
-            return $extensions;
-        }
+            $tabs['zl_basic']  = __( 'General', $this->plugin_name );
+            //             if( ! empty( $extension_settings['styles'] ) ) {
+            //                 $tabs['styles'] = __( 'Styles', $this->plugin_name );
+            //             }
 
+            //             if( ! empty( $extension_settings['addons'] ) ) {
 
-        /**
-         * @param $extension_settings
-         * @return mixed
-         */
-        public function awac_get_tabs($extension_settings){
-
-            $tabs['awac_basic']  = __( 'General', $this->plugin_name );
-            if( ! empty( $extension_settings['styles'] ) ) {
-                $tabs['styles'] = __( 'Styles', $this->plugin_name );
-            }
-
-            if( ! empty( $extension_settings['addons'] ) ) {
-
-                $tabs['addons'] = __( 'Add-ons', $this->plugin_name );
-            }
+            //                 $tabs['addons'] = __( 'Add-ons', $this->plugin_name );
+            //             }
 
             return $tabs;
         }
 
 
-
-
         /**
          * Registers settings fields
          */
-        public function awac_initialize_options(){
+        public function zl_initialize_options(){
             add_settings_section(
-                'awac_basic',
-                __('Where to show the widget area', $this->plugin_name),
-                array($this, 'awac_basic_section_display'),
-                'awac-options',
-                array('class'=>'subtitle')
+                'zl_basic',
+                __('Customization', $this->plugin_name),
+                array($this, 'zl_basic_section_display'),
+                'ZLPL-options'
             );
             /**
-             * all_post_categories written by @doncullen
+             * all_buttons written by @doncullen
              */
             add_settings_field(
-                'all_post_categories',
-                __('Post Categories<p class="description">The widget will not show on post categories that are checked</p>', $this->plugin_name ),
-                array($this, 'awac_postcategories_boxes_display'),
-                'awac-options',
-                'awac_basic'
+                'all_buttons',
+                __('BUTTON SELECTION<p class="description">you should choose the button you need.by default, all button will be displayed</p>', $this->plugin_name ),
+                array($this, 'zl_button_selection'),
+                'ZLPL-options',
+                'zl_basic'
             );
             register_setting(
-                'awac_basic',
-                'all_post_categories'
+                'ZLPL-options',
+                'all_buttons'
             );
 
             add_settings_field(
-                'all_post_types',
-                __('Post Types<p class="description">The widget will not show on post types that are checked</p>', $this->plugin_name ),
-                array($this, 'awac_type_boxes_display'),
-                'awac-options',
-                'awac_basic'
+                'button_format',
+                __('BUTTON FORMAT<p class="description">customize the button format</p>', $this->plugin_name ),
+                array($this, 'zl_button_format'),
+                'ZLPL-options',
+                'zl_basic',
+                [
+                    'label_for' => 'zl_button_format',
+                    'class' => 'zl_opt_list',
+                    'zl_custom_data' => 'custom',
+                ]
             );
             register_setting(
-                'awac_basic',
-                'all_post_types'
-            );
-            add_settings_field(
-                'all_post_formats',
-                __('Post Formats<p class="description">The widget will not show on post formats that are checked</p>', $this->plugin_name ),
-                array($this, 'awac_formats_boxes_display'),
-                'awac-options',
-                'awac_basic'
-
-            );
-            register_setting(
-                'awac_basic',
-                'all_post_formats'
+                'ZLPL-options',
+                'button_format'
             );
 
             add_settings_field(
-                'awac_priority',
-                __('Widget Priority<p class="description"></p>', $this->plugin_name ),
-                array($this, 'awac_priority_display'),
-                'awac-options',
-                'awac_basic',
+                'button_color',
+                __('BUTTON COLOR<p class="description">customize the button color</p>', $this->plugin_name ),
+                array($this, 'zl_button_color'),
+                'ZLPL-options',
+                'zl_basic',
+                [
+                    'label_for' => 'zl_button_color',
+                    'class' => 'zl_opt_list',
+                    'zl_custom_data' => 'custom',
+                ]
+            );
+            register_setting(
+                'ZLPL-options',
+                'button_color'
+            );
+
+            add_settings_field(
+                'upload_donate_QR_image'.
+                __('QR image<p class="description">select the QR image for receiving donations </p>', $this->plugin_name ),
+                array($this, 'QR_image'),
+                'ZLPL-options',
+                'zl_basic',
                 array('type'=>'radio')
 
             );
             register_setting(
-                'awac_basic',
-                'awac_priority'
+                'ZLPL-options',
+                'upload_donate_QR_image'
             );
-
-
-            //add settings created to show on the styles tab
-            $settings = $this->awac_get_extension_settings();
-            if( ! empty( $settings['styles'] ) ) {
-                add_settings_section(
-                'awac_styles',
-                __( 'Styles', $this->plugin_name ),
-                array($this, 'awac_styles_section_display'),
-                'styles'
-                );
-
-                register_setting( 'styles', 'awac_styles' );
-            }
-
-
-            //add settings created to show on the addon tab
-            if( ! empty( $settings['addons'] ) ) {
-                add_settings_section(
-                'awac_addons',
-                __( 'Addons', $this->plugin_name ),
-                 array($this, 'awac_addon_section_display'),
-                'addons'
-                );
-
-                register_setting( 'addons', 'awac_addons' );
-            }
-
-        }
-
-        public function awac_styles_section_display(){
-
-        }
-
-        public function awac_addon_section_display(){
-
-        }
-
-
-
-        /**
-         * Description for the basic
-         *
-         */
-        public function awac_basic_section_display(){
-            //echo __('<p>By default the widget will display on all posts. Use the options below to prevent the widget from showing on a specific post type or post format.</p>', $this->plugin_name  );
-        }
-
-
-        /**
-         * Display the checkboxes for each post type
-         *
-         */
-        public function awac_type_boxes_display(){
-            $post_types = get_post_types();
-            $options = (array)get_option('all_post_types');
-
-
-            foreach ( $post_types as $type ) {
-                if( !isset($options[$type]) ){
-                    $options[$type] = 0;
-                }
-                echo '<label><input name="all_post_types['. $type .']" id="all_post_types['. $type .']" type="checkbox" value="1" class="code" ' . checked( 1, $options[$type], false ) . ' />'. $type .'</label><br />' ;
-
-            }
-
         }
 
         /**
          * Display the categories for posts
          * @doncullen
          */
-        public function awac_postcategories_boxes_display(){
-            $post_categories = get_categories();
-            $options = (array)get_option('all_post_categories');
+        public function zl_button_selection(){
+            $button_selection = array('like_button', 'dislike_button', 'donate_button');
+            $options = (array)get_option('all_buttons');
 
-
-            foreach ( $post_categories as $category ) {
-                $cat = $category->name;
-                if( !isset($options[$cat]) ){
-                    $options[$cat] = 0;
+            foreach ( $button_selection as $selected ) {
+                if( !isset($options[$selected]) ){
+                    $options[$selected] = 0;
                 }
-                echo '<label><input name="all_post_categories['. $cat .']" id="all_post_categories['. $cat .']" type="checkbox" value="1" class="code" ' . checked( 1, $options[$cat], false ) . ' />'. $cat .'</label><br />' ;
+                echo '<label><input name="all_buttons['. $selected .']" id="all_buttons['. $selected .']" type="checkbox" value="1" class="code" ' . checked( 1, $options[$selected], false ) . ' />'. $selected.'</label><br />' ;
 
             }
 
         }
 
 
-        /**
-         * Display the checkboxes for each post format
-         *
-         */
-        public function awac_formats_boxes_display(){
+        public function zl_button_format($args){
+            $options = get_option( 'button_format' );
+            // output the field
+?>
+<select id="<?php echo esc_attr( $args['label_for'] ); ?>"
+        data-custom="<?php echo esc_attr( $args['zl_custom_data'] ); ?>"
+        name="button_format[<?php echo esc_attr( $args['label_for'] ); ?>]"
+        >
+    <option value="rectangle" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'rectangle', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( 'rectangle form', 'ZLPL-options' ); ?>
+    </option>
+    <option value="oval" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'oval', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( 'oval form', 'ZLPL-options' ); ?>
+    </option>
+    <option value="round" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'round', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( 'round form', 'ZLPL-options' ); ?>
+    </option>
+</select>
+<?php
+        }
 
-            if ( current_theme_supports( 'post-formats' ) ) {
-                $post_formats = get_theme_support( 'post-formats' );
-                if ( is_array( $post_formats[0] ) ) {
-                   foreach ($post_formats[0] as $post_format) {
-                        $formats[$post_format] = $post_format;
-                   }
-                }
-            }else{
-                echo 'Theme does not support post formats';
-                return;
-            }
+        public function zl_button_color($args){
+            $options = get_option( 'button_color' );
+            // output the field
+?>
+<select id="<?php echo esc_attr( $args['label_for'] ); ?>"
+        data-custom="<?php echo esc_attr( $args['zl_custom_data'] ); ?>"
+        name="button_color[<?php echo esc_attr( $args['label_for'] ); ?>]"
+        >
+    <option value="dark" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'dark', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( 'dark style', 'ZLPL-options' ); ?>
+    </option>
+    <option value="bright" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'bright', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( 'bright style', 'ZLPL-options' ); ?>
+    </option>
+    <option value="red" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'red', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( 'red style', 'ZLPL-options' ); ?>
+    </option>
+</select>
+<?php
+        }
 
-            $options = (array)get_option('all_post_formats');
-
-            foreach ( $formats as $format ) {
-                if( !isset($options[$format]) )
-                {
-                    $options[$format] = 0;
-                }
-                echo '<label><input name="all_post_formats['. $format .']" id="all_post_formats['. $format .']" type="checkbox" value="1" class="code" ' . checked( 1, $options[$format], false ) . ' />'. $format .'</label><br />' ;
-
-            }
+        public function QR_image(){
 
         }
 
         /**
          * Display the number field for setting the priority of the_content filter insert_after_content
          */
-        public function awac_priority_display(){
-            $option = get_option('awac_priority');
-            ?>
-            <div>
-                <label for="awac_priority">
-                    <input type='number' name='awac_priority' min="1" max="100" value='<?php echo $option ?>'>
-                    <p class='description'>Used to specify the order in which the widget area will be displayed.</p>
-                </label>
-            </div>
-
-        <?php
-        }
-
 
         /**
          * Display rate us message in footer only on settings page.
          * @param  string $text wordpress admin footer text
          * @return string       updated footer text
          */
-        public function awac_display_admin_footer($text) {
+        public function zl_display_admin_footer($text) {
 
             $currentScreen = get_current_screen();
 
-            if ( $currentScreen->id == 'appearance_page_awac-options' ) {
+            if ( $currentScreen->id == 'appearance_page_zl-options' ) {
                 $rate_text = sprintf( __( 'Thank you for using <a href="%1$s" target="_blank">Add Widget After Content</a>! Please <a href="%2$s" target="_blank">rate us</a> on <a href="%2$s" target="_blank">WordPress.org</a>',  $this->plugin_name ),
-                    'https://pintopsolutions.com/downloads/add-widget-after-content/',
-                    'https://wordpress.org/support/view/plugin-reviews/add-widget-after-content?filter=5#postform'
-                );
+                                     'https://pintopsolutions.com/downloads/add-widget-after-content/',
+                                     'https://wordpress.org/support/view/plugin-reviews/add-widget-after-content?filter=5#postform'
+                                    );
 
                 return str_replace( '</span>', '', $text ) . ' | ' . $rate_text . '</span>';
             } else {
@@ -350,3 +275,4 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
 
 
 }
+?>
