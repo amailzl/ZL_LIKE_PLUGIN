@@ -42,10 +42,24 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
             $this->version = $version;
             add_action('admin_menu', array( $this,'zl_add_options_page'));
             add_action('admin_init', array( $this,'zl_initialize_options'));
+            add_action( 'admin_enqueue_scripts', array( $this, 'zl_add_style'));
             add_filter('admin_footer_text', array( $this,'zl_display_admin_footer'));
 
         }
 
+       public function zl_add_style() {
+            if(is_admin()){
+                //https://developer.wordpress.org/reference/functions/is_single/
+                wp_enqueue_script( 'zl-post-likes-script', plugins_url('../res/js/button-response.js', __FILE__), array('jquery'));
+                $zl_nonce = wp_create_nonce( 'zl_like_nonce' );
+                //https://codex.wordpress.org/Function_Reference/wp_localize_script
+                wp_localize_script( 'zl-post-likes-script', 'zl_press_action', array(
+                    'ajax_url' => admin_url( 'admin-ajax.php' ),
+                    'nonce'    => $zl_nonce,
+                ) );
+            }
+            return;
+        }
 
         /**
          * Adds the 'ZL Post Likes Options' to the Appearance menu in the Dashboard
@@ -122,7 +136,7 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
              */
             add_settings_field(
                 'all_buttons',
-                __('BUTTON SELECTION<p class="description">you should choose the button you need.by default, all button will be displayed</p>', $this->plugin_name ),
+                __('BUTTON SELECTION<p class="description">you should choose the button you need.like button is displayed by default</p>', $this->plugin_name ),
                 array($this, 'zl_button_selection'),
                 'ZLPL-options',
                 'zl_basic'
@@ -133,37 +147,20 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
             );
 
             add_settings_field(
-                'button_format',
-                __('BUTTON FORMAT<p class="description">customize the button format</p>', $this->plugin_name ),
-                array($this, 'zl_button_format'),
+                'button_style',
+                __('BUTTON STYLE<p class="description">customize the button style</p>', $this->plugin_name ),
+                array($this, 'zl_button_style'),
                 'ZLPL-options',
                 'zl_basic',
                 [
-                    'label_for' => 'zl_button_format',
+                    'label_for' => 'zl_button_style',
                     'class' => 'zl_opt_list',
                     'zl_custom_data' => 'custom',
                 ]
             );
             register_setting(
                 'ZLPL-options',
-                'button_format'
-            );
-
-            add_settings_field(
-                'button_color',
-                __('BUTTON COLOR<p class="description">customize the button color</p>', $this->plugin_name ),
-                array($this, 'zl_button_color'),
-                'ZLPL-options',
-                'zl_basic',
-                [
-                    'label_for' => 'zl_button_color',
-                    'class' => 'zl_opt_list',
-                    'zl_custom_data' => 'custom',
-                ]
-            );
-            register_setting(
-                'ZLPL-options',
-                'button_color'
+                'button_style'
             );
 
             add_settings_field(
@@ -186,8 +183,9 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
          * @doncullen
          */
         public function zl_button_selection(){
-            $button_selection = array('like_button', 'dislike_button', 'donate_button');
+            $button_selection = array('dislike_button', 'donate_button');
             $options = (array)get_option('all_buttons');
+            echo '<label><input name="default_like" id="like_button" type="checkbox" value="1" class="code" ' . checked( 1, 1, false ) . '/>like_button</label><br />' ;
 
             foreach ( $button_selection as $selected ) {
                 if( !isset($options[$selected]) ){
@@ -199,44 +197,20 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
 
         }
 
-
-        public function zl_button_format($args){
-            $options = get_option( 'button_format' );
+        public function zl_button_style($args){
+            $options = get_option( 'button_style' );
+            echo $options['zl_button_style'];
             // output the field
 ?>
 <select id="<?php echo esc_attr( $args['label_for'] ); ?>"
         data-custom="<?php echo esc_attr( $args['zl_custom_data'] ); ?>"
-        name="button_format[<?php echo esc_attr( $args['label_for'] ); ?>]"
-        >
-    <option value="rectangle" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'rectangle', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'rectangle form', 'ZLPL-options' ); ?>
-    </option>
-    <option value="oval" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'oval', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'oval form', 'ZLPL-options' ); ?>
-    </option>
-    <option value="round" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'round', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'round form', 'ZLPL-options' ); ?>
-    </option>
-</select>
-<?php
-        }
-
-        public function zl_button_color($args){
-            $options = get_option( 'button_color' );
-            // output the field
-?>
-<select id="<?php echo esc_attr( $args['label_for'] ); ?>"
-        data-custom="<?php echo esc_attr( $args['zl_custom_data'] ); ?>"
-        name="button_color[<?php echo esc_attr( $args['label_for'] ); ?>]"
+        name="button_style[<?php echo esc_attr( $args['label_for'] ); ?>]"
         >
     <option value="dark" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'dark', false ) ) : ( '' ); ?>>
         <?php esc_html_e( 'dark style', 'ZLPL-options' ); ?>
     </option>
     <option value="bright" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'bright', false ) ) : ( '' ); ?>>
         <?php esc_html_e( 'bright style', 'ZLPL-options' ); ?>
-    </option>
-    <option value="red" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'red', false ) ) : ( '' ); ?>>
-        <?php esc_html_e( 'red style', 'ZLPL-options' ); ?>
     </option>
 </select>
 <?php

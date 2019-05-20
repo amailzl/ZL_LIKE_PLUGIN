@@ -39,6 +39,7 @@ if ( !class_exists( 'zl_post_likes' ) ) {
         // https://developer.wordpress.org/reference/functions/wp_enqueue_style/
         protected $plugin_slug = 'zl-like-plugin';
         protected $plugin_version = '0.1.0';
+        protected $settings;
 
         function __construct() {
             add_filter( 'the_content', array( $this, 'insert_after_content'), $this->get_content_filter_priority());
@@ -165,8 +166,9 @@ if ( !class_exists( 'zl_post_likes' ) ) {
         }
 
         public function insert_after_content( $postcontent ) {
+            $select_btn = (array)get_option('all_buttons');
             if($this->zl_like_show(get_the_ID())){
-                $zl_3btn = $this->zl_likes_get3bn();
+                $zl_3btn = $this->zl_likes_getbtn();
                 $postcontent.= apply_filters('zl_3btn', $zl_3btn );
             }
             return $postcontent;
@@ -176,9 +178,15 @@ if ( !class_exists( 'zl_post_likes' ) ) {
         /**
         * Get 3_button form for html
         */
-        public function zl_likes_get3bn() {
+        public function zl_likes_getbtn() {
+            $select_style = get_option('button_style');
+            if('dark' === $select_style['zl_button_style']){
+                $style = 'zlpl_button_style_1';
+            }
+
             $QRurl = plugins_url('./user/1556508976.png', __FILE__);
             $ToSponsor = 'THANKS';
+
             $likes = get_post_meta(get_the_ID(), "zl_likes", true);
             $dislikes = get_post_meta(get_the_ID(), "zl_dislikes", true);
             if(!$likes || !is_numeric($likes)){
@@ -189,13 +197,21 @@ if ( !class_exists( 'zl_post_likes' ) ) {
                 $dislikes = 0;
                 update_post_meta(get_the_ID(), '$dislikes', 0);
             }
-            $fmt_3bt='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="zlpl_button_style_1">喜欢<span class="like_counts">('.$likes.')</span></button>';
+
+            $btn_opt=(array)get_option('all_buttons');
+            $dislike_opt=$btn_opt['dislike_button'];
+            $donate_opt=$btn_opt['donate_button'];
+            $fmt_btn='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="'.$style.'">喜欢<span class="like_counts">('.$likes.')</span></button>';
             //'.php.' use ('.) (.')to wrap the php content you want to use
-            $fmt_3bt.=' | <button id="zl-dislike" data-id="'.get_the_ID().'" class="zlpl_button_style_1">不喜欢<span class="dislike_counts">('.$dislikes.')</span></button>';
-            $fmt_3bt.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="zlpl_button_style_1">打赏</button></div>';
-            $fmt_3bt.='<div id="theQR" align="center" ><br/><br/><img src="'.$QRurl.'"  alt="oops..." width="100" height="100"/></div>';
-            $fmt_3bt.='<div id="comment" align="center" ><br/>'.$ToSponsor.'</div>';
-            return $fmt_3bt;
+            if($dislike_opt === '1'){
+                $fmt_btn.=' | <button id="zl-dislike" data-id="'.get_the_ID().'" class="'.$style.'">不喜欢<span class="dislike_counts">('.$dislikes.')</span></button>';
+            }
+            if($donate_opt === '1'){
+                $fmt_btn.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="'.$style.'">打赏</button></div>';
+            }
+            $fmt_btn.='<div id="theQR" align="center" ><br/><br/><img src="'.$QRurl.'"  alt="oops..." width="100" height="100"/></div>';
+            $fmt_btn.='<div id="comment" align="center" ><br/>'.$ToSponsor.'</div>';
+            return $fmt_btn;
         }
 
         //https://codex.wordpress.org/Conditional_Tags
