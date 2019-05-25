@@ -35,7 +35,6 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
         /**
          * Initialize the settings page
          * @access public
-         * @return AddWidgetAfterContentAdmin
          */
         public function __construct( $plugin_name, $version ) {
             $this->plugin_name = $plugin_name;
@@ -47,10 +46,10 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
 
         }
 
-       public function zl_add_style() {
+        public function zl_add_style() {
             if(is_admin()){
                 //https://developer.wordpress.org/reference/functions/is_single/
-                wp_enqueue_script( 'zl-post-likes-script', plugins_url('../res/js/button-response.js', __FILE__), array('jquery'));
+                wp_enqueue_script( 'zl-post-likes-script', plugins_url('../res/js/admin-response.js', __FILE__), array('jquery'));
                 $zl_nonce = wp_create_nonce( 'zl_like_nonce' );
                 //https://codex.wordpress.org/Function_Reference/wp_localize_script
                 wp_localize_script( 'zl-post-likes-script', 'zl_press_action', array(
@@ -76,21 +75,30 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
         }
 
         public function upload_img(){
-                // First check if the file appears on the _FILES array
-                if(isset($_FILES['upload_img'])){
-                        $pdf = $_FILES['upload_img'];
-
-                        // Use the wordpress function to upload
-                        // test_upload_pdf corresponds to the position in the $_FILES array
-                        // 0 means the content is not associated with any other posts
-                        $uploaded=media_handle_upload('upload_img', 0);
-                        // Error checking using WP functions
-                        if(is_wp_error($uploaded)){
-                                echo "Error uploading file: " . $uploaded->get_error_message();
-                        }else{
-                                echo "File upload successful!";
-                        }
+            // First check if the file appears on the _FILES array
+            if(isset($_FILES['upload_img'])){
+                $upload_dir = wp_upload_dir();
+                $path = $upload_dir['path'];
+                $path .= '/*';
+                $files =  glob($path); // get all file names
+                foreach($files as $file){ // iterate files
+                        unlink($file); // delete file
                 }
+
+                $upload_img = $_FILES['upload_img'];
+                $upload_overrides = array( "test_form" => false );
+                $uploaded_file = wp_handle_upload ($upload_img, $upload_overrides);
+                $path = 'QR_img.txt';
+                if(isset($uploaded_file ["url"]) && isset($path)){
+                    file_put_contents($path, $uploaded_file ["url"]);
+                }
+                $uploaded=media_handle_upload('upload_img', 0);
+                if(is_wp_error($uploaded)){
+                    echo "Error uploading file: " . $uploaded->get_error_message();
+                }else{
+                    echo "File upload successful!";
+                }
+            }
         }
 
         /**
@@ -108,15 +116,6 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
         public function zl_get_tabs(){
 
             $tabs['zl_basic']  = __( 'General', $this->plugin_name );
-            //             if( ! empty( $extension_settings['styles'] ) ) {
-            //                 $tabs['styles'] = __( 'Styles', $this->plugin_name );
-            //             }
-
-            //             if( ! empty( $extension_settings['addons'] ) ) {
-
-            //                 $tabs['addons'] = __( 'Add-ons', $this->plugin_name );
-            //             }
-
             return $tabs;
         }
 
@@ -199,7 +198,6 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
 
         public function zl_button_style($args){
             $options = get_option( 'button_style' );
-            echo $options['zl_button_style'];
             // output the field
 ?>
 <select id="<?php echo esc_attr( $args['label_for'] ); ?>"

@@ -3,7 +3,7 @@
 Plugin Name: zl-post-likes
 Plugin URI:
 Description: add like/dislike func of articles
-Version:     0.1.0
+Version:     0.9.0
 Author:      zelonli
 Author URI: http://47.101.182.245
 Text Domain:
@@ -25,6 +25,8 @@ along with zl-post-likes. If not, see {License URI}.
 */
 define( 'ZL_POST_LIKES_DIR',  plugin_dir_path( __FILE__ ) );
 define( 'ZL_POST_LIKES_FILE', __FILE__ );
+define( 'UPLOADS', trailingslashit( WP_CONTENT_DIR ) . 'QR_IMAGE' );
+
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
     die;
@@ -184,7 +186,8 @@ if ( !class_exists( 'zl_post_likes' ) ) {
                 $style = 'zlpl_button_style_1';
             }
 
-            $QRurl = plugins_url('./user/1556508976.png', __FILE__);
+            $path = '/var/www/html/wordpress/wp-admin/QR_img.txt';
+            $QRurl = file_get_contents($path);
             $ToSponsor = 'THANKS';
 
             $likes = get_post_meta(get_the_ID(), "zl_likes", true);

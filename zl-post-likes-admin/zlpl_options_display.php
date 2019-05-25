@@ -58,18 +58,18 @@
                     </div>
                     <div class="postbox">
                         <div class="inside">
-                        <h4>Upload QR Image</h4>
-                        <form  method="post" enctype="multipart/form-data">
-                            <input type='file' id='upload_img' name='upload_img'></input>
+                            <h4>Upload QR Image</h4>
+                            <form  method="post" enctype="multipart/form-data">
+                                <input type='file' id='upload_img' name='upload_img'></input>
                             <p class="description">Upload Your Collect QR Code for donations</p>
                             <?php submit_button('Upload'); ?>
-                        </form>
+                            </form>
                         <div class="clear"></div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 <?php do_action( 'ps_awac_settings_bottom' ); ?>
 </div>
