@@ -60,8 +60,10 @@
                         <div class="inside">
                             <h4>Upload QR Image</h4>
                             <form  method="post" enctype="multipart/form-data">
-                                <input type='file' id='upload_img' name='upload_img'></input>
-                            <p class="description">Upload Your Collect QR Code for donations</p>
+                                <input type='file' id='upload_img' name='upload_img'></input><br />
+                                <p class="description">Upload Your Collect QR Code for donations</p>
+                                <input type='text' id='upload_txt' name='upload_txt'></input><br />
+                                <p class="description">you can write something down here to the donators</p>
                             <?php submit_button('Upload'); ?>
                             </form>
                         <div class="clear"></div>

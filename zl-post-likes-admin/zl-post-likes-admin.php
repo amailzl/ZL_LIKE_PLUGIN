@@ -74,33 +74,47 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
             );
         }
 
-        public function upload_img(){
+        public function upload_handler(){
             // First check if the file appears on the _FILES array
             if(isset($_FILES['upload_img'])){
-                $upload_dir = wp_upload_dir();
-                $path = $upload_dir['path'];
-                $path .= '/*';
-                $files =  glob($path); // get all file names
-                foreach($files as $file){ // iterate files
-                        unlink($file); // delete file
-                }
 
                 $upload_img = $_FILES['upload_img'];
                 $upload_overrides = array( "test_form" => false );
                 $uploaded_file = wp_handle_upload ($upload_img, $upload_overrides);
+                $uploaded=media_handle_upload('upload_img', 0);
+
+                if (!empty( $uploaded_file ["file"])){
+                    $upload_dir = wp_upload_dir();
+                    $path = $upload_dir['path'];
+                    $path .= '/*';
+                    $files =  glob($path); // get all file names
+                    foreach($files as $file){ // iterate files
+                        if($file != $uploaded_file ["file"]){
+                            unlink($file); // delete file
+                        }
+                    }
+                }
+
                 $path = 'QR_img.txt';
                 if(isset($uploaded_file ["url"]) && isset($path)){
                     file_put_contents($path, $uploaded_file ["url"]);
                 }
-                $uploaded=media_handle_upload('upload_img', 0);
                 if(is_wp_error($uploaded)){
                     echo "Error uploading file: " . $uploaded->get_error_message();
                 }else{
-                    echo "File upload successful!";
+                    echo "upload successful!";
                 }
             }
-        }
 
+            if(isset($_REQUEST['upload_txt'])){
+                $upload_txt = $_REQUEST['upload_txt'];
+                $path = 'a_word.txt';
+                if (!empty($upload_txt)){
+                    file_put_contents($path, $upload_txt);
+                }
+            }
+
+        }
         /**
          * Renders the content of the zl options page
          */
@@ -108,7 +122,7 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
             if ( ! current_user_can( 'manage_options' ) ) {
                 return;
             }
-            $this->upload_img();
+            $this->upload_handler();
             $tabs = $this->zl_get_tabs();
             require_once(ZL_POST_LIKES_DIR . 'zl-post-likes-admin/zlpl_options_display.php');
         }
