@@ -16,7 +16,7 @@
     !I can use the source code without any responsibities
     !I do not take any kind of legal responsibities of the source code
 
-more information in LICENSE
+    more information in LICENSE
 
 3.INTRODUCTION:
     ver 1.0.1
