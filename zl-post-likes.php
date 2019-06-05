@@ -213,7 +213,7 @@ if ( !class_exists( 'zl_post_likes' ) ) {
             $donate_opt=$btn_opt['donate_button'];
             $fmt_btn='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="'.$style.'">喜欢<span class="like_counts">('.$likes.')</span></button>';
             if($style === 'zlpl_button_style_3'){
-                $fmt_btn='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="'.$style.'"><span class="heart"><br/><span class="like_counts">('.$likes.')</span></button>';
+                $fmt_btn='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="'.$style.'"><span class="heart"><br/><span class="like_counts">'.$likes.'</span></button>';
             }
             //'.php.' use ('.) (.')to wrap the php content you want to use
             if($dislike_opt === '1' && $style != 'zlpl_button_style_3'){
@@ -223,7 +223,7 @@ if ( !class_exists( 'zl_post_likes' ) ) {
                 $fmt_btn.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="'.$style.'">打赏</button></div>';
             }
             if($dislike_opt === '1' && $style === 'zlpl_button_style_3'){
-                $fmt_btn.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="zlpl_button_style_3_donate"><span class="thumbup"><br/>打赏</button></div>';
+                $fmt_btn.=' * <button id="zl-donate" data-id="'.get_the_ID().'"  class="zlpl_button_style_3_donate"><span class="thumbup"><br/>打赏</button></div>';
             }
             $fmt_btn.='<div id="theQR" align="center" ><br/><br/><img src="'.$QRurl.'"  alt="oops..." width="100" height="100"/></div>';
             $fmt_btn.='<div id="comment" align="center" ><br/>'.$ToSponsor.'</div>';
