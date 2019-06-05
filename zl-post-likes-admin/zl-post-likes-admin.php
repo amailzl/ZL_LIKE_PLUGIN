@@ -161,7 +161,7 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
 
             add_settings_field(
                 'button_style',
-                __('BUTTON STYLE<p class="description">customize the button style</p>', $this->plugin_name ),
+                __('BUTTON STYLE<p class="description">customize the button style(the style start with * do not display dislike button even if you selected it in button selection)</p>', $this->plugin_name ),
                 array($this, 'zl_button_style'),
                 'ZLPL-options',
                 'zl_basic',
@@ -224,6 +224,9 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
     <option value="bright" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'bright', false ) ) : ( '' ); ?>>
         <?php esc_html_e( 'bright style', 'ZLPL-options' ); ?>
     </option>
+    <option value="heart" <?php echo isset( $options[ $args['label_for'] ] ) ? ( selected( $options[ $args['label_for'] ], 'bright', false ) ) : ( '' ); ?>>
+        <?php esc_html_e( '*heart style', 'ZLPL-options' ); ?>
+    </option>
 </select>
 <?php
         }
@@ -244,14 +247,13 @@ if ( !class_exists( 'zl_post_likes_admin' ) ) {
         public function zl_display_admin_footer($text) {
 
             $currentScreen = get_current_screen();
-
-            if ( $currentScreen->id == 'appearance_page_zl-options' ) {
-                $rate_text = sprintf( __( 'Thank you for using <a href="%1$s" target="_blank">Add Widget After Content</a>! Please <a href="%2$s" target="_blank">rate us</a> on <a href="%2$s" target="_blank">WordPress.org</a>',  $this->plugin_name ),
-                                     'https://pintopsolutions.com/downloads/add-widget-after-content/',
-                                     'https://wordpress.org/support/view/plugin-reviews/add-widget-after-content?filter=5#postform'
+            if ( $currentScreen->id == 'toplevel_page_ZLPL-options' ) {
+                $thk_text = sprintf( __( 'Thank you for using <a href="%1$s" target="_blank">ZL Post Likes</a>! Feel free to <a href="%2$s" target="_blank">get source code</a> and do whatever you like with it',  $this->plugin_name ),
+                                     'https://zelonLi.com',
+                                     'https://github.com/amailzl/ZL_LIKE_PLUGIN'
                                     );
 
-                return str_replace( '</span>', '', $text ) . ' | ' . $rate_text . '</span>';
+                return str_replace( '</span>', '', $text ) . ' | ' . $thk_text . '</span>';
             } else {
                 return $text;
             }

@@ -3,12 +3,12 @@
 Plugin Name: zl-post-likes
 Plugin URI:
 Description: add like/dislike func of articles
-Version:     0.1.0
+Version:     1.0.1
 Author:      zelonli
-Author URI: http://47.101.182.245
+Author URI: http://zelonli.com
 Text Domain:
 Domain Path: /languages
-License:     GPL2
+License:     GPL3
 
 zl-post-likes is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -185,7 +185,12 @@ if ( !class_exists( 'zl_post_likes' ) ) {
             if('dark' === $select_style['zl_button_style']){
                 $style = 'zlpl_button_style_1';
             }
-
+            if('bright' === $select_style['zl_button_style']){
+                $style = 'zlpl_button_style_2';
+            }
+            if('heart' === $select_style['zl_button_style']){
+                $style = 'zlpl_button_style_3';
+            }
             $img_path = '/var/www/html/wordpress/wp-admin/QR_img.txt';
             $QRurl = file_get_contents($img_path);
 
@@ -207,12 +212,18 @@ if ( !class_exists( 'zl_post_likes' ) ) {
             $dislike_opt=$btn_opt['dislike_button'];
             $donate_opt=$btn_opt['donate_button'];
             $fmt_btn='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="'.$style.'">喜欢<span class="like_counts">('.$likes.')</span></button>';
+            if($style === 'zlpl_button_style_3'){
+                $fmt_btn='<div align="center"><button id="zl-like" data-id="'.get_the_ID().'" class="'.$style.'"><span class="heart"><br/><span class="like_counts">('.$likes.')</span></button>';
+            }
             //'.php.' use ('.) (.')to wrap the php content you want to use
-            if($dislike_opt === '1'){
+            if($dislike_opt === '1' && $style != 'zlpl_button_style_3'){
                 $fmt_btn.=' | <button id="zl-dislike" data-id="'.get_the_ID().'" class="'.$style.'">不喜欢<span class="dislike_counts">('.$dislikes.')</span></button>';
             }
-            if($donate_opt === '1'){
+            if($dislike_opt === '1' && $style != 'zlpl_button_style_3'){
                 $fmt_btn.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="'.$style.'">打赏</button></div>';
+            }
+            if($dislike_opt === '1' && $style === 'zlpl_button_style_3'){
+                $fmt_btn.=' | <button id="zl-donate" data-id="'.get_the_ID().'"  class="zlpl_button_style_3_donate"><span class="thumbup"><br/>打赏</button></div>';
             }
             $fmt_btn.='<div id="theQR" align="center" ><br/><br/><img src="'.$QRurl.'"  alt="oops..." width="100" height="100"/></div>';
             $fmt_btn.='<div id="comment" align="center" ><br/>'.$ToSponsor.'</div>';

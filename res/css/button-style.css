@@ -1,3 +1,4 @@
+/* style dark */
 .zlpl_button_style_1 {
   width : 80px;
   display: inline-block;
@@ -20,4 +21,172 @@
   color: #555555;
   background-color: white;
   border:  2px solid #555555;
+}
+
+/* style bright */
+.zlpl_button_style_2 {
+  width : 80px;
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  cursor: pointer;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  background-color: #f44336;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_2:hover {
+  color: white;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_2:active {
+  color: #f44336;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 12px;
+}
+
+/* style heart */
+.zlpl_button_style_3 {
+  width : 80px;
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  cursor: pointer;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  background-color: #f44336;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_3:hover {
+  color: white;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_3:active {
+  color: #f44336;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_3_donate {
+  width : 80px;
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+  cursor: pointer;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  background-color: #4CAF50;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_3_donate:hover {
+  color: white;
+  border-radius: 12px;
+}
+
+.zlpl_button_style_3_donate:active {
+  color: #4CAF50;
+  background-color: white;
+  font-weight: bold;
+  border-radius: 12px;
+}
+/* style heart */
+.heart {
+    position: relative;
+    display: inline-block;
+  width: 20px;
+    height: 18px;
+}
+.heart:before,
+.heart:after {
+    position: absolute;
+    content: "";
+    left: 10px;
+    top: 0;
+    width: 10px;
+    height: 16px;
+    background: white;
+    -moz-border-radius: 10px 10px 0 0;
+    border-radius: 10px 10px 0 0;
+    -webkit-transform: rotate(-45deg);
+       -moz-transform: rotate(-45deg);
+        -ms-transform: rotate(-45deg);
+         -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+    -webkit-transform-origin: 0 100%;
+       -moz-transform-origin: 0 100%;
+        -ms-transform-origin: 0 100%;
+         -o-transform-origin: 0 100%;
+            transform-origin: 0 100%;
+}
+.heart:after {
+    left: 0;
+    -webkit-transform: rotate(45deg);
+       -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+         -o-transform: rotate(45deg);
+            transform: rotate(45deg);
+    -webkit-transform-origin: 100% 100%;
+       -moz-transform-origin: 100% 100%;
+        -ms-transform-origin: 100% 100%;
+         -o-transform-origin: 100% 100%;
+            transform-origin :100% 100%;
+}
+/* style thumbup */
+
+.thumbup {
+    position: relative;
+    display: inline-block;
+  width: 18;
+    height: 18px;
+}
+.thumbup:before,
+.thumbup:after {
+    position: absolute;
+    content: "";
+    left: 2px;
+    top: 0px;
+    width: 5px;
+    height: 10px;
+    background: white;
+    -moz-border-radius: 10px 10px 0 0;
+    border-radius: 10px 10px 0 0;
+    -webkit-transform: rotate(45deg);
+       -moz-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+         -o-transform: rotate(45deg);
+            transform: rotate(45deg);
+    -webkit-transform-origin: 100% 100%;
+       -moz-transform-origin: 100% 100%;
+        -ms-transform-origin: 100% 100%;
+         -o-transform-origin: 100% 100%;
+            transform-origin :100% 100%;
+}
+.thumbup:after {
+    left: -8px;
+  width: 12px;
+    height: 15px;
+  top: 1px;
+    -webkit-transform: rotate(90deg);
+       -moz-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+         -o-transform: rotate(90deg);
+            transform: rotate(90deg);
+    -webkit-transform-origin: 100% 100%;
+       -moz-transform-origin: 100% 100%;
+        -ms-transform-origin: 100% 100%;
+         -o-transform-origin: 100% 100%;
+            transform-origin :100% 100%;
 }
