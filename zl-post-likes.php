@@ -40,7 +40,7 @@ if ( !class_exists( 'zl_post_likes' ) ) {
         // https://developer.wordpress.org/reference/functions/plugins_url/
         // https://developer.wordpress.org/reference/functions/wp_enqueue_style/
         protected $plugin_slug = 'zl-like-plugin';
-        protected $plugin_version = '0.1.0';
+        protected $plugin_version = '1.0.1';
         protected $settings;
 
         function __construct() {
